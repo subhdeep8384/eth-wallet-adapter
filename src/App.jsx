@@ -1,8 +1,9 @@
+import { useRef } from "react";
 import "./App.css";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { createPublicClient } from "viem";
 import { base, mainnet } from "viem/chains";
-import { createConfig , http, injected, useAccount, useBalance, useConnect, WagmiProvider } from 'wagmi'
+import { createConfig , http, injected, useAccount, useBalance, useConnect, useSendTransaction, WagmiProvider } from 'wagmi'
 import { metaMask, safe } from "wagmi/connectors";
 
 export const config = createConfig({
@@ -36,6 +37,7 @@ function App() {
   );
 }
 
+
 function WalletConnector() {
   const { connectors, connect } = useConnect();
   const { address, isConnected } = useAccount();
@@ -65,12 +67,23 @@ function WalletConnector() {
 
 
 function WalletAdapter() {
+  const addressRef = useRef("") ;
   const balance = useBalance()
+  const {data : hash , sendTransaction } = useSendTransaction() ;
+  
+  function EthSend() {
+    console.log(addressRef)
+    sendTransaction({
+      to: addressRef.current.value,
+      value: 1000000000000000,
+    })
+    console.log("The hash is :::" ,hash)
+  }
   return(<div>
     <WalletConnector />
     <p>Your balance: {balance.data?.formatted}</p>
-    <input type="text" placeholder="Address" />
-    <button>Send Eth </button>
+    <input ref={addressRef} type="text" placeholder="Address" />
+    <button  onClick={EthSend}>Send Eth </button>
   </div>
   )
 }
